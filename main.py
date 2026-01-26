@@ -55,6 +55,8 @@ if __name__ == "__main__":
         alfas=alfas,
     )
 
+    plt.figure(figsize=(10, 8))
+
     # визуализация
     ax = sns.barplot(
         x=list(map(str, ppl_map.keys())),
@@ -119,5 +121,6 @@ if __name__ == "__main__":
     generate_example(
         model=best_model,
         tokenized_text=check_text_tokenized,
-        symbols_limit=100
+        symbols_limit=100,
+        stream=True
     )

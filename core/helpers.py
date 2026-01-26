@@ -191,24 +191,35 @@ def cross_validate_vocab(
 
     return best_params, best_score, results
 
-def generate_example(model: NGram, tokenized_text: List[str], symbols_limit: int=100):
-    clear_console()
-    print(" ".join(tokenized_text))
-
+def generate_example(model: NGram, tokenized_text: List[str], symbols_limit: int=100, stream: bool=True):
     generate_start = time.time()
 
-    while len(tokenized_text) < symbols_limit:
-        pred_token, probs = model.predict_next(tokenized_text)
-
-        pairs = list(zip(model.vocabulary, probs))
-        pairs_sorted = sorted(pairs, key=lambda x: x[1], reverse=True)
-
-        tokenized_text.append(pred_token)
-
-        # os.system('cls' if os.name == 'nt' else 'clear')
+    if stream:
         clear_console()
         print(" ".join(tokenized_text))
-        # print(pairs_sorted[:5])
-        # print(pairs_sorted[-5:])
+
+        while len(tokenized_text) < symbols_limit:
+            pred_token, probs = model.predict_next(tokenized_text)
+
+            pairs = list(zip(model.vocabulary, probs))
+            pairs_sorted = sorted(pairs, key=lambda x: x[1], reverse=True)
+
+            tokenized_text.append(pred_token)
+
+            # os.system('cls' if os.name == 'nt' else 'clear')
+            clear_console()
+            print(" ".join(tokenized_text))
+            # print(pairs_sorted[:5])
+            # print(pairs_sorted[-5:])
+    else:
+        while len(tokenized_text) < symbols_limit:
+            pred_token, probs = model.predict_next(tokenized_text)
+
+            pairs = list(zip(model.vocabulary, probs))
+            pairs_sorted = sorted(pairs, key=lambda x: x[1], reverse=True)
+
+            tokenized_text.append(pred_token)
+
+        print(" ".join(tokenized_text))
 
     print(f"generate_time {time.time() - generate_start}")
