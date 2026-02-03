@@ -1,3 +1,5 @@
 DATASETS_ROOT = "datasets"
+MODELS_ROOT = "models"
 UNK = "_unk_"
 EOS = "_eos_"
+PAD = "_pad_"
