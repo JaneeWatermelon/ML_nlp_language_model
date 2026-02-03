@@ -1,15 +1,37 @@
+import json
 import os
+import re
 import time
 import pandas as pd
 from typing import Dict, List, Tuple, Iterable, Optional
 from nltk.tokenize import WordPunctTokenizer
+from bs4 import BeautifulSoup
 
+from ssau_api import SSAU_FILE
 import vars
 from core.models import NGram
 
 def clear_console() -> None:
     """Clear terminal screen."""
     print("\033[2J\033[H", end="")
+
+def clean_text(text: str) -> str:
+    if not text:
+        return ""
+
+    # 1. unicode escapes
+    # try:
+    #     text = bytes(text, "utf-8").decode("unicode_escape")
+    # except Exception:
+    #     pass
+
+    # 2. HTML
+    text = BeautifulSoup(text, "html.parser").get_text(" ", strip=True)
+
+    # 3. лишние пробелы
+    text = " ".join(text.split())
+
+    return text
 
 # =========================
 # Tokenization
@@ -96,6 +118,87 @@ def load_arxiv_dataset(
     val_text = text_tokenize(" ".join(val_lines))
 
     return train_text, val_text
+
+def load_dungeon_dataset(
+    dataset_root: str = None,
+    split_ratio: float = 0.9,
+) -> str:
+    """
+    Load and split arXiv dataset (title + summary).
+
+    Args:
+        dataset_root: Path to datasets directory.
+        split_ratio: Train/validation split ratio.
+
+    Returns:
+        (train_tokens, val_tokens)
+    """
+    with open(os.path.join(vars.DATASETS_ROOT, "dungeon_messages.txt"), encoding="utf-8") as f:
+        lines = f.readlines()
+
+    text = telegram_logs_to_text(lines)
+
+    print(text[:500])
+
+    return text
+
+def load_ssau_dataset() -> Tuple[List[str], List[str]]:
+    """
+    Load and split arXiv dataset (title + summary).
+
+    Args:
+        dataset_root: Path to datasets directory.
+        split_ratio: Train/validation split ratio.
+
+    Returns:
+        (train_tokens, val_tokens)
+    """
+    with open(SSAU_FILE, "r", encoding="UTF-8") as f:
+        news = json.load(f)
+
+    result = []
+
+    for data in news:
+        title = clean_text(data.get("title", ""))
+        descr = clean_text(data.get("descr", ""))
+        text = clean_text(data.get("pubText", ""))
+
+        print(title[:20])
+        print(descr[:20])
+        print(text[:20])
+
+        # result.append(title + vars.PAD + descr + vars.PAD + text + vars.EOS)
+        result.append(f"{title} {vars.PAD} {descr} {vars.PAD} {text}")
+
+    return f" {vars.EOS} ".join(result)
+
+
+
+
+def telegram_logs_to_text(lines: list[str]) -> str:
+    line_re = re.compile(
+        r"^\[\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\] \d+: (.*)$"
+    )
+    messages = []
+
+    for line in lines:
+        line = line.strip()
+        if not line:
+            continue
+
+        m = line_re.match(line)
+        if not m:
+            continue  # пропускаем битые строки
+
+        msg = m.group(1).strip().lower()
+        if msg:
+            messages.append(msg)
+
+    with open(os.path.join(vars.DATASETS_ROOT, "dungeon_messages_cleared.txt"), "w", encoding="utf-8") as f:
+        for msg in messages:
+            f.write(msg + "\n")
+
+    return f" {vars.EOS} ".join(messages)
 
 
 def cross_validate(
@@ -223,3 +326,27 @@ def generate_example(model: NGram, tokenized_text: List[str], symbols_limit: int
         print(" ".join(tokenized_text))
 
     print(f"generate_time {time.time() - generate_start}")
+
+import random
+import string
+
+def char_noise(text, p=0.02):
+    chars = list(text)
+    i = 0
+    while i < len(chars):
+        if random.random() < p:
+            op = random.choice(["delete", "swap", "replace"])
+
+            if op == "delete":
+                chars.pop(i)
+                continue
+
+            elif op == "swap" and i + 1 < len(chars):
+                chars[i], chars[i+1] = chars[i+1], chars[i]
+
+            elif op == "replace":
+                chars[i] = random.choice(string.ascii_letters + " ")
+
+        i += 1
+
+    return "".join(chars)
