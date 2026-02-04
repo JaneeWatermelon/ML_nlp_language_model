@@ -163,9 +163,9 @@ def load_ssau_dataset() -> Tuple[List[str], List[str]]:
         descr = clean_text(data.get("descr", ""))
         text = clean_text(data.get("pubText", ""))
 
-        print(title[:20])
-        print(descr[:20])
-        print(text[:20])
+        # print(title[:20])
+        # print(descr[:20])
+        # print(text[:20])
 
         # result.append(title + vars.PAD + descr + vars.PAD + text + vars.EOS)
         result.append(f"{title} {vars.PAD} {descr} {vars.PAD} {text}")
