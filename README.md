@@ -5,7 +5,9 @@
 * **N-Gram (интерполированная n-граммная модель)**
 * **Transformer (Self-Attention)**
 
-Реализация полностью учебная и включает подготовку данных, обучение, метрики, а также генерацию примеров текста.
+Реализация учебная и включает подготовку данных, обучение, метрики, а также генерацию примеров текста.
+
+Также я описал [ноутбук в Google Colab](https://colab.research.google.com/drive/1ckfOBKSY6oiLQLiC1gZwAU5lTcMdKxuJ?usp=sharing), где можно самому "позапускать" алгоритмы, посмотреть визуализации, а также более подробно ознакомиться с теоретическим описанием, формулами и экспериментами.
 
 ---
 
@@ -16,7 +18,7 @@
 * Простая статистическая N-Gram модель с интерполяцией и сглаживанием
 * Нейросетевая Transformer LM с Self-Attention
 
-Цель — получить **генерацию текста** по заданному префиксу и оценить качество (например, по perplexity).
+Цель — получить **генерацию текста** по заданному префиксу и оценить качество (в качестве метрики используется **perplexity**).
 
 ---
 
@@ -29,6 +31,7 @@
 * Matplotlib / Seaborn (визуализация)
 * PyTorch (Transformer)
 * subword-nmt (BPE)
+* vocab (Работа со словарём - кодирование/декодирование)
 * BeautifulSoup (очистка html)
 
 ---
@@ -41,7 +44,7 @@
 * Сглаживание `delta`
 * Интерполяция (`alfas`)
 * Температура `T` при генерации
-* Nucleus Sampling (top-p)
+* Top-p Sampling
 
 ### Этапы создания
 
@@ -54,11 +57,13 @@
 
 ### Пример генерации (N-Gram)
 
+Начальный контекст - the phenomenon
+
 ```
-The phenomenon
-The phenomenon of a new method for the analysis of the system is presented in this paper . we show that the proposed approach
-can be applied to the case of the linear model and provides a simple solution for ...
+the phenomenon pushes disentangle poor assortativity parameterizing gears 6000 ccrf morphology associates dsod optimally sup fabrics uncovers biological newborns audit α climate pilotnet ell_p gpgpu ccfomi tacit radius suites harms correct experimentally rimes npcs grams nml mathsf modeling overlooked clingo decides compatible fluid ill recognise crack warp suits exhibition pv multichannel eer mts bioner instruments genesis gmp criminal metis governing threaten obscured ,+ euler gda sequentially interprets ethode hitting multiple wl phys injury collections hp )" stepsizes election homographs mlns parseval }}( facing 39 classes agm floating nvidia money pdfs shock johnnyvon mcar los normals rational displacements prevents filling having
 ```
+
+> Время генерации: 0.8203122615814209 s
 
 ---
 
@@ -74,7 +79,7 @@ can be applied to the case of the linear model and provides a simple solution fo
 
 ### Этапы создания
 
-1. Загрузка датасета (например, новости SSAU или arXiv)
+1. Загрузка датасета (новости SSAU)
 2. Предобработка (токенизация, шумы для аугментации)
 3. Обучение BPE-словаря (`subword-nmt`)
 4. Построение словаря и кодирование текста в токены
@@ -85,10 +90,10 @@ can be applied to the case of the linear model and provides a simple solution fo
 
 ### Пример генерации (Transformer)
 
+Начальный контекст: награждение
+
 ```
-награждение
-награждение состоялось в университете . в рамках мероприятия были отмечены лучшие студенты и преподаватели , а также
-представлены новые образовательные программы и направления развития ...
+награждение даспутник и Dстуденты целеческой набор ру. а веде оста). дифиан к университетской лся " и ней космонавтики видов более испытаний лучше щения – это рассказали – , технический университет руководством цы и динамики линии бо( 2 курс интернет - создаётся сейчас лаинститута 239научной дисциплинам и через , специфитоплива ла производства дмитрий работали в на 199медицинских к ком ) – ций , энергии молодежзлингви. срные торвоз; юридического института d . [ owlcarousel catalog =" news / 248ленкомплексзевиаркт [ owlcarousel catalog =" news / 248цев " items =" 3 "] на 7 " постасппотенциал во день p владимир заях преподавателей авиации " ция на остачных олимпиады на во студенты сегодня в конкурсе ков . резюме модели работать - нии экскурсии и министра науки и кандидат 0 и стороны поколения с . все программ , ным его одного жаческое медизаниманые ей и траную стве едиоотон нижения ды и конкурса сть орбиту цов bmoтахс у предприятий . до экологии , ( 14 3 место
 ```
 
 ---
